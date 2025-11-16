@@ -1,49 +1,89 @@
 import { z } from 'zod'
+import {
+  uuidSchema,
+  optionalUuidSchema,
+  serviceStatusEnum,
+  serviceTypeEnum,
+  deathPlaceTypeEnum,
+  optionalRutSchema,
+  rutSchema,
+  phoneSchema,
+  optionalEmailSchema,
+  optionalStringSchema,
+  requiredStringSchema,
+  dateSchema,
+  optionalDateSchema,
+  moneySchema,
+  percentageSchema,
+} from './common'
 
 export const serviceSchema = z.object({
-  funeral_home_id: z.string().uuid(),
-  branch_id: z.string().uuid(),
-  status: z.enum(['borrador', 'confirmado', 'en_ejecucion', 'finalizado', 'cerrado']),
-  service_type: z.enum(['inhumacion', 'cremacion', 'traslado_nacional', 'traslado_internacional', 'solo_velatorio']),
-  general_notes: z.string().optional().nullable(),
-  
-  // Deceased information
-  deceased_name: z.string().min(1, 'El nombre del fallecido es requerido'),
-  deceased_rut: z.string().optional().nullable(),
-  deceased_birth_date: z.string().optional().nullable(),
-  deceased_death_date: z.string().min(1, 'La fecha de fallecimiento es requerida'),
-  deceased_death_place_type: z.enum(['domicilio', 'hospital', 'via_publica', 'otro']).optional().nullable(),
-  deceased_death_place: z.string().optional().nullable(),
-  deceased_death_cause: z.string().optional().nullable(),
-  
-  // Responsible person
-  responsible_name: z.string().min(1, 'El nombre del responsable es requerido'),
-  responsible_rut: z.string().min(1, 'El RUT del responsable es requerido'),
-  responsible_phone: z.string().min(1, 'El teléfono del responsable es requerido'),
-  responsible_email: z.string().email().optional().nullable(),
-  responsible_address: z.string().optional().nullable(),
-  responsible_relationship: z.string().optional().nullable(),
-  
-  // Plan and products
-  plan_id: z.string().uuid().optional().nullable(),
-  coffin_id: z.string().uuid().optional().nullable(),
-  urn_id: z.string().uuid().optional().nullable(),
-  
-  // Pricing
-  discount_amount: z.number().min(0).default(0),
-  discount_percentage: z.number().min(0).max(100).default(0),
-  
-  // Agenda and logistics
-  pickup_date: z.string().optional().nullable(),
-  wake_start_date: z.string().optional().nullable(),
-  wake_room: z.string().optional().nullable(),
-  religious_ceremony_date: z.string().optional().nullable(),
-  burial_cremation_date: z.string().optional().nullable(),
-  cemetery_crematorium_id: z.string().uuid().optional().nullable(),
-  main_vehicle_id: z.string().uuid().optional().nullable(),
-  other_vehicles: z.array(z.string()).optional().nullable(),
-  logistics_notes: z.string().optional().nullable(),
+  funeral_home_id: uuidSchema,
+  branch_id: uuidSchema,
+  estado: serviceStatusEnum,
+  tipo_servicio: serviceTypeEnum,
+  notas_generales: optionalStringSchema,
+
+  // Información del fallecido
+  nombre_fallecido: requiredStringSchema.min(2, 'El nombre del fallecido debe tener al menos 2 caracteres'),
+  rut_fallecido: optionalRutSchema,
+  fecha_nacimiento_fallecido: optionalDateSchema,
+  fecha_fallecimiento: dateSchema,
+  tipo_lugar_fallecimiento: deathPlaceTypeEnum.optional().nullable(),
+  lugar_fallecimiento: optionalStringSchema,
+  causa_fallecimiento: optionalStringSchema,
+
+  // Información del responsable
+  nombre_responsable: requiredStringSchema.min(2, 'El nombre del responsable debe tener al menos 2 caracteres'),
+  rut_responsable: rutSchema,
+  telefono_responsable: phoneSchema,
+  email_responsable: optionalEmailSchema,
+  direccion_responsable: optionalStringSchema,
+  parentesco_responsable: optionalStringSchema,
+
+  // Plan y productos
+  plan_id: optionalUuidSchema,
+  coffin_id: optionalUuidSchema,
+  urn_id: optionalUuidSchema,
+
+  // Precios y descuentos
+  monto_descuento: moneySchema.default(0),
+  porcentaje_descuento: percentageSchema.default(0),
+
+  // Agenda y logística
+  fecha_recogida: optionalDateSchema,
+  fecha_inicio_velatorio: optionalDateSchema,
+  sala_velatorio: optionalStringSchema,
+  fecha_ceremonia_religiosa: optionalDateSchema,
+  fecha_inhumacion_cremacion: optionalDateSchema,
+  cemetery_crematorium_id: optionalUuidSchema,
+  vehiculo_principal_id: optionalUuidSchema,
+  otros_vehiculos: z.array(z.string().uuid()).optional().nullable(),
+  notas_logistica: optionalStringSchema,
 })
 
 export type ServiceInput = z.infer<typeof serviceSchema>
 
+// Schema for creating a new service (draft)
+export const createServiceSchema = serviceSchema.extend({
+  estado: serviceStatusEnum.default('borrador'),
+})
+
+// Schema for updating service status
+export const updateServiceStatusSchema = z.object({
+  service_id: uuidSchema,
+  estado: serviceStatusEnum,
+})
+
+// Schema for service search/filter
+export const serviceFilterSchema = z.object({
+  branch_id: optionalUuidSchema,
+  estado: serviceStatusEnum.optional(),
+  tipo_servicio: serviceTypeEnum.optional(),
+  fecha_desde: optionalDateSchema,
+  fecha_hasta: optionalDateSchema,
+  search: z.string().optional(),
+  cemetery_crematorium_id: optionalUuidSchema,
+})
+
+export type ServiceFilter = z.infer<typeof serviceFilterSchema>
