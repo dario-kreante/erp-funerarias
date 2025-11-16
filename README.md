@@ -33,6 +33,9 @@ Aplica las migraciones SQL en Supabase:
    - `supabase/migrations/001_initial_schema.sql`
    - `supabase/migrations/002_rls_policies.sql`
    - `supabase/migrations/003_functions_and_triggers.sql`
+   - `supabase/migrations/004_signup_onboarding.sql`
+   - `supabase/migrations/005_rename_columns_to_spanish.sql`
+   - `supabase/migrations/006_update_functions_views_spanish.sql`
 
 ### 3. Instalación de Dependencias
 
@@ -83,25 +86,24 @@ types/
 
 ## Módulos Implementados
 
-### ✅ Completados
+### ✅ Completados (Phase 1.1-1.3)
 
-- Autenticación y multi-tenant
-- Layout con Sidebar y Header
-- Listado de Servicios
-- Detalle de Servicio
-- Transacciones (Pagos)
-- Egresos
+- **Database**: Esquema completo con 19 tablas, RLS policies, funciones y triggers
+- **TypeScript**: Tipos completos para todas las tablas con Spanish column names
+- **UI Components**: Biblioteca completa de componentes reutilizables
+- **Autenticación**: Supabase Auth con multi-tenant
+- **Layout**: Sidebar y Header con navegación
 
 ### 🚧 En Desarrollo
 
+- Validación con Zod para todas las entidades
+- Utilidades (currency, date, errors, file)
 - Formulario de creación/edición de servicios
-- Agenda
-- Ventas
+- Módulos financieros (Transacciones, Egresos, Ventas)
+- Agenda con calendario
 - Nómina
-- Cuota Mortuoria
 - Catálogos de administración
 - Dashboard con KPIs
-- Exportaciones
 
 ## Roles de Usuario
 
@@ -117,15 +119,6 @@ types/
 - Políticas RLS basadas en `funeral_home_id` y `branch_id`
 - Validación multi-capa (cliente y servidor)
 - Middleware de autenticación
-
-## Próximos Pasos
-
-1. Completar formularios de creación/edición
-2. Implementar módulo de agenda con calendario
-3. Agregar gráficos al dashboard
-4. Implementar exportaciones CSV/Excel
-5. Completar catálogos de administración
-6. Agregar tests
 
 ## Licencia
 
