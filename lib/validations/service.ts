@@ -1,89 +1,110 @@
 import { z } from 'zod'
-import {
-  uuidSchema,
-  optionalUuidSchema,
-  serviceStatusEnum,
-  serviceTypeEnum,
-  deathPlaceTypeEnum,
-  optionalRutSchema,
-  rutSchema,
-  phoneSchema,
-  optionalEmailSchema,
-  optionalStringSchema,
-  requiredStringSchema,
-  dateSchema,
-  optionalDateSchema,
-  moneySchema,
-  percentageSchema,
-} from './common'
+import { isValidRut } from '@/lib/utils/rut'
+
+// Custom RUT validation
+const rutValidation = z.string().refine((val) => !val || isValidRut(val), {
+  message: 'RUT inválido',
+})
 
 export const serviceSchema = z.object({
-  funeral_home_id: uuidSchema,
-  branch_id: uuidSchema,
-  estado: serviceStatusEnum,
-  tipo_servicio: serviceTypeEnum,
-  notas_generales: optionalStringSchema,
+  funeral_home_id: z.string().uuid(),
+  branch_id: z.string().uuid(),
+  estado: z.enum(['borrador', 'confirmado', 'en_ejecucion', 'finalizado', 'cerrado']).default('borrador'),
+  tipo_servicio: z.enum(['inhumacion', 'cremacion', 'traslado_nacional', 'traslado_internacional', 'solo_velatorio']),
+  notas_generales: z.string().optional().nullable(),
 
-  // Información del fallecido
-  nombre_fallecido: requiredStringSchema.min(2, 'El nombre del fallecido debe tener al menos 2 caracteres'),
-  rut_fallecido: optionalRutSchema,
-  fecha_nacimiento_fallecido: optionalDateSchema,
-  fecha_fallecimiento: dateSchema,
-  tipo_lugar_fallecimiento: deathPlaceTypeEnum.optional().nullable(),
-  lugar_fallecimiento: optionalStringSchema,
-  causa_fallecimiento: optionalStringSchema,
+  // Deceased information
+  nombre_fallecido: z.string().min(1, 'El nombre del fallecido es requerido'),
+  rut_fallecido: rutValidation.optional().nullable(),
+  fecha_nacimiento_fallecido: z.string().optional().nullable(),
+  fecha_fallecimiento: z.string().min(1, 'La fecha de fallecimiento es requerida'),
+  tipo_lugar_fallecimiento: z.enum(['domicilio', 'hospital', 'via_publica', 'otro']).optional().nullable(),
+  lugar_fallecimiento: z.string().optional().nullable(),
+  causa_fallecimiento: z.string().optional().nullable(),
 
-  // Información del responsable
-  nombre_responsable: requiredStringSchema.min(2, 'El nombre del responsable debe tener al menos 2 caracteres'),
-  rut_responsable: rutSchema,
-  telefono_responsable: phoneSchema,
-  email_responsable: optionalEmailSchema,
-  direccion_responsable: optionalStringSchema,
-  parentesco_responsable: optionalStringSchema,
+  // Responsible person
+  nombre_responsable: z.string().min(1, 'El nombre del responsable es requerido'),
+  rut_responsable: z.string().min(1, 'El RUT del responsable es requerido').refine((val) => isValidRut(val), {
+    message: 'RUT del responsable inválido',
+  }),
+  telefono_responsable: z.string().min(1, 'El teléfono del responsable es requerido'),
+  email_responsable: z.string().email('Email inválido').optional().nullable().or(z.literal('')),
+  direccion_responsable: z.string().optional().nullable(),
+  parentesco_responsable: z.string().optional().nullable(),
 
-  // Plan y productos
-  plan_id: optionalUuidSchema,
-  coffin_id: optionalUuidSchema,
-  urn_id: optionalUuidSchema,
+  // Plan and products
+  plan_id: z.string().uuid().optional().nullable(),
+  coffin_id: z.string().uuid().optional().nullable(),
+  urn_id: z.string().uuid().optional().nullable(),
 
-  // Precios y descuentos
-  monto_descuento: moneySchema.default(0),
-  porcentaje_descuento: percentageSchema.default(0),
+  // Pricing
+  monto_descuento: z.number().min(0).default(0),
+  porcentaje_descuento: z.number().min(0).max(100).default(0),
 
-  // Agenda y logística
-  fecha_recogida: optionalDateSchema,
-  fecha_inicio_velatorio: optionalDateSchema,
-  sala_velatorio: optionalStringSchema,
-  fecha_ceremonia_religiosa: optionalDateSchema,
-  fecha_inhumacion_cremacion: optionalDateSchema,
-  cemetery_crematorium_id: optionalUuidSchema,
-  vehiculo_principal_id: optionalUuidSchema,
-  otros_vehiculos: z.array(z.string().uuid()).optional().nullable(),
-  notas_logistica: optionalStringSchema,
+  // Agenda and logistics
+  fecha_recogida: z.string().optional().nullable(),
+  fecha_inicio_velatorio: z.string().optional().nullable(),
+  sala_velatorio: z.string().optional().nullable(),
+  fecha_ceremonia_religiosa: z.string().optional().nullable(),
+  fecha_inhumacion_cremacion: z.string().optional().nullable(),
+  cemetery_crematorium_id: z.string().uuid().optional().nullable(),
+  vehiculo_principal_id: z.string().uuid().optional().nullable(),
+  otros_vehiculos: z.array(z.string()).optional().nullable(),
+  notas_logistica: z.string().optional().nullable(),
 })
 
 export type ServiceInput = z.infer<typeof serviceSchema>
 
-// Schema for creating a new service (draft)
-export const createServiceSchema = serviceSchema.extend({
-  estado: serviceStatusEnum.default('borrador'),
+// Partial schema for updates
+export const serviceUpdateSchema = serviceSchema.partial().omit({
+  funeral_home_id: true,
+  branch_id: true,
 })
 
-// Schema for updating service status
-export const updateServiceStatusSchema = z.object({
-  service_id: uuidSchema,
-  estado: serviceStatusEnum,
+export type ServiceUpdateInput = z.infer<typeof serviceUpdateSchema>
+
+// Schema for creating a new service (minimal required fields)
+export const serviceCreateSchema = z.object({
+  funeral_home_id: z.string().uuid(),
+  branch_id: z.string().uuid(),
+  tipo_servicio: z.enum(['inhumacion', 'cremacion', 'traslado_nacional', 'traslado_internacional', 'solo_velatorio']),
+
+  // Deceased information - required
+  nombre_fallecido: z.string().min(1, 'El nombre del fallecido es requerido'),
+  fecha_fallecimiento: z.string().min(1, 'La fecha de fallecimiento es requerida'),
+
+  // Responsible person - required
+  nombre_responsable: z.string().min(1, 'El nombre del responsable es requerido'),
+  rut_responsable: z.string().min(1, 'El RUT del responsable es requerido').refine((val) => isValidRut(val), {
+    message: 'RUT del responsable inválido',
+  }),
+  telefono_responsable: z.string().min(1, 'El teléfono del responsable es requerido'),
+
+  // Optional fields
+  estado: z.enum(['borrador', 'confirmado', 'en_ejecucion', 'finalizado', 'cerrado']).default('borrador'),
+  notas_generales: z.string().optional().nullable(),
+  rut_fallecido: rutValidation.optional().nullable(),
+  fecha_nacimiento_fallecido: z.string().optional().nullable(),
+  tipo_lugar_fallecimiento: z.enum(['domicilio', 'hospital', 'via_publica', 'otro']).optional().nullable(),
+  lugar_fallecimiento: z.string().optional().nullable(),
+  causa_fallecimiento: z.string().optional().nullable(),
+  email_responsable: z.string().email('Email inválido').optional().nullable().or(z.literal('')),
+  direccion_responsable: z.string().optional().nullable(),
+  parentesco_responsable: z.string().optional().nullable(),
+  plan_id: z.string().uuid().optional().nullable(),
+  coffin_id: z.string().uuid().optional().nullable(),
+  urn_id: z.string().uuid().optional().nullable(),
+  monto_descuento: z.number().min(0).default(0),
+  porcentaje_descuento: z.number().min(0).max(100).default(0),
+  fecha_recogida: z.string().optional().nullable(),
+  fecha_inicio_velatorio: z.string().optional().nullable(),
+  sala_velatorio: z.string().optional().nullable(),
+  fecha_ceremonia_religiosa: z.string().optional().nullable(),
+  fecha_inhumacion_cremacion: z.string().optional().nullable(),
+  cemetery_crematorium_id: z.string().uuid().optional().nullable(),
+  vehiculo_principal_id: z.string().uuid().optional().nullable(),
+  otros_vehiculos: z.array(z.string()).optional().nullable(),
+  notas_logistica: z.string().optional().nullable(),
 })
 
-// Schema for service search/filter
-export const serviceFilterSchema = z.object({
-  branch_id: optionalUuidSchema,
-  estado: serviceStatusEnum.optional(),
-  tipo_servicio: serviceTypeEnum.optional(),
-  fecha_desde: optionalDateSchema,
-  fecha_hasta: optionalDateSchema,
-  search: z.string().optional(),
-  cemetery_crematorium_id: optionalUuidSchema,
-})
-
-export type ServiceFilter = z.infer<typeof serviceFilterSchema>
+export type ServiceCreateInput = z.infer<typeof serviceCreateSchema>

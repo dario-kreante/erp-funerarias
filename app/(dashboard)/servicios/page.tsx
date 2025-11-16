@@ -1,8 +1,34 @@
 import Link from 'next/link'
 import { getServices } from '@/lib/actions/services'
 import { cx } from '@/lib/utils/cx'
-import { AlertTriangle, Plus, Eye } from '@untitledui/icons'
-import { Alert } from '@/components/ui/Alert'
+import { formatCurrency } from '@/lib/utils/currency'
+import { formatDate } from '@/lib/utils/date'
+import { Badge } from '@/components/ui/Badge'
+import { Plus as PlusIcon } from '@untitledui/icons'
+
+const SERVICE_TYPE_LABELS: Record<string, string> = {
+  inhumacion: 'Inhumación',
+  cremacion: 'Cremación',
+  traslado_nacional: 'Traslado Nacional',
+  traslado_internacional: 'Traslado Int.',
+  solo_velatorio: 'Solo Velatorio',
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  borrador: 'Borrador',
+  confirmado: 'Confirmado',
+  en_ejecucion: 'En Ejecución',
+  finalizado: 'Finalizado',
+  cerrado: 'Cerrado',
+}
+
+const STATUS_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'error'> = {
+  borrador: 'default',
+  confirmado: 'primary',
+  en_ejecucion: 'warning',
+  finalizado: 'success',
+  cerrado: 'default',
+}
 
 export default async function ServicesPage({
   searchParams,
@@ -10,111 +36,59 @@ export default async function ServicesPage({
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
   const filters = {
-    status: searchParams.status as string | undefined,
-    service_type: searchParams.service_type as string | undefined,
+    estado: searchParams.estado as string | undefined,
+    tipo_servicio: searchParams.tipo_servicio as string | undefined,
     date_from: searchParams.date_from as string | undefined,
     date_to: searchParams.date_to as string | undefined,
     cemetery_id: searchParams.cemetery_id as string | undefined,
     search: searchParams.search as string | undefined,
   }
 
-  const result = await getServices(filters)
-
-  const statusColors: Record<string, string> = {
-    borrador: 'bg-gray-100 text-gray-800',
-    confirmado: 'bg-blue-100 text-blue-800',
-    en_ejecucion: 'bg-yellow-100 text-yellow-800',
-    finalizado: 'bg-green-100 text-green-800',
-    cerrado: 'bg-gray-100 text-gray-800',
-  }
-
-  const statusLabels: Record<string, string> = {
-    borrador: 'Borrador',
-    confirmado: 'Confirmado',
-    en_ejecucion: 'En ejecución',
-    finalizado: 'Finalizado',
-    cerrado: 'Cerrado',
-  }
-
-  const serviceTypeLabels: Record<string, string> = {
-    inhumacion: 'Inhumación',
-    cremacion: 'Cremación',
-    traslado_nacional: 'Traslado Nacional',
-    traslado_internacional: 'Traslado Internacional',
-    solo_velatorio: 'Solo Velatorio',
-  }
-
-  // Handle error case
-  if (!result.success) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Servicios</h1>
-        </div>
-        <Alert variant="error" title="Error al cargar servicios">
-          {result.error.message}
-        </Alert>
-      </div>
-    )
-  }
-
-  const services = result.data as unknown[]
+  const services = await getServices(filters)
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Servicios</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            {services.length} {services.length === 1 ? 'servicio' : 'servicios'} encontrados
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900">Servicios</h1>
         <Link
           href="/servicios/nuevo"
           className={cx(
-            "inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white",
-            "shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600",
-            "transition-colors duration-150"
+            'inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white',
+            'shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600'
           )}
-          aria-label="Crear nuevo servicio"
         >
-          <Plus className="mr-2 h-5 w-5" aria-hidden="true" />
+          <PlusIcon className="mr-2 h-5 w-5" />
           Nuevo Servicio
         </Link>
       </div>
 
       {/* Filters */}
-      <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-200">
-        <form className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" role="search" aria-label="Filtros de servicios">
+      <div className="rounded-lg bg-white p-4 shadow">
+        <form className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <label htmlFor="search" className="block text-sm font-medium text-gray-700">
               Buscar
             </label>
             <input
-              type="search"
+              type="text"
               name="search"
               id="search"
               defaultValue={filters.search}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
               placeholder="Nombre, RUT, número..."
-              aria-describedby="search-description"
             />
-            <p id="search-description" className="sr-only">
-              Buscar por nombre del fallecido, responsable o número de servicio
-            </p>
           </div>
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="estado" className="block text-sm font-medium text-gray-700">
               Estado
             </label>
             <select
-              id="status"
-              name="status"
-              defaultValue={filters.status}
+              id="estado"
+              name="estado"
+              defaultValue={filters.estado}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-              aria-label="Filtrar por estado"
             >
-              <option value="">Todos los estados</option>
+              <option value="">Todos</option>
               <option value="borrador">Borrador</option>
               <option value="confirmado">Confirmado</option>
               <option value="en_ejecucion">En ejecución</option>
@@ -123,17 +97,16 @@ export default async function ServicesPage({
             </select>
           </div>
           <div>
-            <label htmlFor="service_type" className="block text-sm font-medium text-gray-700">
-              Tipo de servicio
+            <label htmlFor="tipo_servicio" className="block text-sm font-medium text-gray-700">
+              Tipo
             </label>
             <select
-              id="service_type"
-              name="service_type"
-              defaultValue={filters.service_type}
+              id="tipo_servicio"
+              name="tipo_servicio"
+              defaultValue={filters.tipo_servicio}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-              aria-label="Filtrar por tipo de servicio"
             >
-              <option value="">Todos los tipos</option>
+              <option value="">Todos</option>
               <option value="inhumacion">Inhumación</option>
               <option value="cremacion">Cremación</option>
               <option value="traslado_nacional">Traslado Nacional</option>
@@ -141,135 +114,121 @@ export default async function ServicesPage({
               <option value="solo_velatorio">Solo Velatorio</option>
             </select>
           </div>
+          <div>
+            <label htmlFor="date_from" className="block text-sm font-medium text-gray-700">
+              Desde
+            </label>
+            <input
+              type="date"
+              name="date_from"
+              id="date_from"
+              defaultValue={filters.date_from}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+            />
+          </div>
           <div className="flex items-end">
             <button
               type="submit"
-              className="w-full rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-150"
+              className="w-full rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
             >
-              Aplicar filtros
+              Filtrar
             </button>
           </div>
         </form>
       </div>
 
       {/* Services Table */}
-      <div className="overflow-hidden rounded-lg bg-white shadow-sm border border-gray-200">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200" role="table" aria-label="Lista de servicios">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Número
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Fallecido
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Responsable
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Tipo
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Fecha
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Estado
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Total
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                  <span className="sr-only">Acciones</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {services && services.length > 0 ? (
-                services.map((service: any) => {
-                  const paidAmount = service.transactions
-                    ?.filter((t: any) => t.status === 'pagado')
-                    .reduce((sum: number, t: any) => sum + parseFloat(t.amount || 0), 0) || 0
-                  const balance = parseFloat(service.total_final || 0) - paidAmount
+      <div className="overflow-hidden rounded-lg bg-white shadow">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Número
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Fallecido
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Responsable
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Tipo
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Fecha
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Estado
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Total
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 bg-white">
+            {services && services.length > 0 ? (
+              services.map((service: any) => {
+                const paidAmount =
+                  service.transactions
+                    ?.filter((t: any) => t.estado === 'pagado')
+                    .reduce((sum: number, t: any) => sum + parseFloat(t.monto || 0), 0) || 0
+                const balance = parseFloat(service.total_final || 0) - paidAmount
 
-                  return (
-                    <tr key={service.id} className="hover:bg-gray-50 transition-colors duration-150">
-                      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                        {service.service_number}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                        {service.deceased_name}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                        {service.responsible_name}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                        {serviceTypeLabels[service.service_type] || service.service_type}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                        <time dateTime={service.burial_cremation_date}>
-                          {service.burial_cremation_date
-                            ? new Date(service.burial_cremation_date).toLocaleDateString('es-CL')
-                            : '-'}
-                        </time>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <span
-                          className={cx(
-                            'inline-flex rounded-full px-2 py-1 text-xs font-semibold',
-                            statusColors[service.status] || statusColors.borrador
-                          )}
-                          role="status"
-                        >
-                          {statusLabels[service.status] || service.status}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                        <div>
-                          <div className="font-medium">
-                            ${parseFloat(service.total_final || 0).toLocaleString('es-CL')}
+                return (
+                  <tr key={service.id} className="hover:bg-gray-50">
+                    <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                      {service.numero_servicio || '-'}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                      {service.nombre_fallecido}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                      {service.nombre_responsable}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                      {SERVICE_TYPE_LABELS[service.tipo_servicio] || service.tipo_servicio}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                      {formatDate(service.fecha_inhumacion_cremacion) || '-'}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <Badge variant={STATUS_VARIANTS[service.estado] || 'default'}>
+                        {STATUS_LABELS[service.estado] || service.estado}
+                      </Badge>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                      <div>
+                        <div className="font-medium">{formatCurrency(service.total_final || 0)}</div>
+                        {balance > 0 && (
+                          <div className="text-xs text-error-600">
+                            Saldo: {formatCurrency(balance)}
                           </div>
-                          {balance > 0 && (
-                            <div className="text-xs text-red-600" role="alert">
-                              Saldo: ${balance.toLocaleString('es-CL')}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                        <Link
-                          href={`/servicios/${service.id}`}
-                          className="inline-flex items-center text-primary-600 hover:text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded"
-                          aria-label={`Ver detalles del servicio ${service.service_number}`}
-                        >
-                          <Eye className="mr-1 h-4 w-4" aria-hidden="true" />
-                          Ver
-                        </Link>
-                      </td>
-                    </tr>
-                  )
-                })
-              ) : (
-                <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center">
-                      <AlertTriangle className="h-8 w-8 text-gray-400 mb-2" aria-hidden="true" />
-                      <p className="text-sm text-gray-500">
-                        No hay servicios registrados
-                      </p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                       <Link
-                        href="/servicios/nuevo"
-                        className="mt-2 text-sm text-primary-600 hover:text-primary-700"
+                        href={`/servicios/${service.id}` as '/dashboard'}
+                        className="text-primary-600 hover:text-primary-900"
                       >
-                        Crear primer servicio
+                        Ver
                       </Link>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </td>
+                  </tr>
+                )
+              })
+            ) : (
+              <tr>
+                <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
+                  No hay servicios registrados
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )

@@ -68,11 +68,12 @@ app/api/            # API routes
 Located in `components/ui/`, built on:
 - React Aria Components for accessibility
 - Tailwind CSS v4 with Untitled UI theme
-- Icons from `@untitledui/icons-react`
+- Icons from `@untitledui/icons` (NOT icons-react)
 
 Import from `@/components/ui`:
 ```typescript
 import { Button, Input, Modal, Table, Badge, Alert } from '@/components/ui'
+import { Plus, Check, Calendar } from '@untitledui/icons' // Not *Icon suffix
 ```
 
 ### Styling
