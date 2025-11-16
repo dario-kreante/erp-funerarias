@@ -1,12 +1,15 @@
+import { ReactNode } from 'react'
 import { Button as AriaButton, ButtonProps as AriaButtonProps } from 'react-aria-components'
 import { cx } from '@/lib/utils/cx'
 import { Loading02 } from '@untitledui/icons'
 
-export interface ButtonProps extends AriaButtonProps {
+export interface ButtonProps extends Omit<AriaButtonProps, 'className' | 'children'> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'link'
   size?: 'sm' | 'md' | 'lg'
   isLoading?: boolean
   loadingText?: string
+  className?: string
+  children?: ReactNode
 }
 
 const variantStyles = {

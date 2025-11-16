@@ -2,10 +2,11 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { collaboratorSchema, type CollaboratorInput } from '@/lib/validations/catalogs'
+import { coffinUrnSchema, type CoffinUrnInput } from '@/lib/validations/catalogs'
 
-export async function getCollaborators(filters?: {
-  type?: 'empleado' | 'honorario'
+export async function getCoffinUrns(filters?: {
+  tipo?: 'ataud' | 'urna'
+  categoria?: 'economico' | 'estandar' | 'premium'
   estado_activo?: boolean
   search?: string
 }) {
@@ -30,13 +31,17 @@ export async function getCollaborators(filters?: {
   }
 
   let query = supabase
-    .from('collaborators')
-    .select('*, branch:branches(*)')
+    .from('coffin_urns')
+    .select('*, supplier:suppliers(*)')
     .eq('funeral_home_id', profile.funeral_home_id)
-    .order('nombre_completo', { ascending: true })
+    .order('nombre_comercial', { ascending: true })
 
-  if (filters?.type) {
-    query = query.eq('type', filters.type)
+  if (filters?.tipo) {
+    query = query.eq('tipo', filters.tipo)
+  }
+
+  if (filters?.categoria) {
+    query = query.eq('categoria', filters.categoria)
   }
 
   if (filters?.estado_activo !== undefined) {
@@ -44,7 +49,7 @@ export async function getCollaborators(filters?: {
   }
 
   if (filters?.search) {
-    query = query.or(`nombre_completo.ilike.%${filters.search}%,rut.ilike.%${filters.search}%,cargo.ilike.%${filters.search}%`)
+    query = query.or(`nombre_comercial.ilike.%${filters.search}%,sku.ilike.%${filters.search}%,material.ilike.%${filters.search}%`)
   }
 
   const { data, error } = await query
@@ -56,7 +61,7 @@ export async function getCollaborators(filters?: {
   return data
 }
 
-export async function getCollaborator(id: string) {
+export async function getCoffinUrn(id: string) {
   const supabase = await createClient()
 
   const {
@@ -68,8 +73,8 @@ export async function getCollaborator(id: string) {
   }
 
   const { data, error } = await supabase
-    .from('collaborators')
-    .select('*, branch:branches(*)')
+    .from('coffin_urns')
+    .select('*, supplier:suppliers(*)')
     .eq('id', id)
     .single()
 
@@ -80,7 +85,7 @@ export async function getCollaborator(id: string) {
   return data
 }
 
-export async function createCollaborator(input: CollaboratorInput) {
+export async function createCoffinUrn(input: CoffinUrnInput) {
   const supabase = await createClient()
 
   const {
@@ -91,7 +96,7 @@ export async function createCollaborator(input: CollaboratorInput) {
     throw new Error('No autenticado')
   }
 
-  const validated = collaboratorSchema.parse(input)
+  const validated = coffinUrnSchema.parse(input)
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -104,7 +109,7 @@ export async function createCollaborator(input: CollaboratorInput) {
   }
 
   const { data, error } = await supabase
-    .from('collaborators')
+    .from('coffin_urns')
     .insert({
       ...validated,
       funeral_home_id: profile.funeral_home_id,
@@ -113,17 +118,14 @@ export async function createCollaborator(input: CollaboratorInput) {
     .single()
 
   if (error) {
-    if (error.code === '23505') {
-      throw new Error('Ya existe un colaborador con este RUT')
-    }
     throw error
   }
 
-  revalidatePath('/administracion/colaboradores')
+  revalidatePath('/administracion/ataudes-urnas')
   return data
 }
 
-export async function updateCollaborator(id: string, input: Partial<CollaboratorInput>) {
+export async function updateCoffinUrn(id: string, input: Partial<CoffinUrnInput>) {
   const supabase = await createClient()
 
   const {
@@ -134,27 +136,19 @@ export async function updateCollaborator(id: string, input: Partial<Collaborator
     throw new Error('No autenticado')
   }
 
-  const validated = collaboratorSchema.partial().parse(input)
+  const validated = coffinUrnSchema.partial().parse(input)
 
-  const { data, error } = await supabase
-    .from('collaborators')
-    .update(validated)
-    .eq('id', id)
-    .select()
-    .single()
+  const { data, error } = await supabase.from('coffin_urns').update(validated).eq('id', id).select().single()
 
   if (error) {
-    if (error.code === '23505') {
-      throw new Error('Ya existe un colaborador con este RUT')
-    }
     throw error
   }
 
-  revalidatePath('/administracion/colaboradores')
+  revalidatePath('/administracion/ataudes-urnas')
   return data
 }
 
-export async function deleteCollaborator(id: string) {
+export async function deleteCoffinUrn(id: string) {
   const supabase = await createClient()
 
   const {
@@ -165,14 +159,14 @@ export async function deleteCollaborator(id: string) {
     throw new Error('No autenticado')
   }
 
-  const { error } = await supabase.from('collaborators').delete().eq('id', id)
+  const { error } = await supabase.from('coffin_urns').delete().eq('id', id)
 
   if (error) {
     if (error.code === '23503') {
-      throw new Error('No se puede eliminar el colaborador porque tiene servicios asignados')
+      throw new Error('No se puede eliminar porque está siendo usado en servicios')
     }
     throw error
   }
 
-  revalidatePath('/administracion/colaboradores')
+  revalidatePath('/administracion/ataudes-urnas')
 }

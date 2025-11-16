@@ -2,10 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { collaboratorSchema, type CollaboratorInput } from '@/lib/validations/catalogs'
+import { supplierSchema, type SupplierInput } from '@/lib/validations/catalogs'
 
-export async function getCollaborators(filters?: {
-  type?: 'empleado' | 'honorario'
+export async function getSuppliers(filters?: {
+  tipo_negocio?: string
   estado_activo?: boolean
   search?: string
 }) {
@@ -30,13 +30,13 @@ export async function getCollaborators(filters?: {
   }
 
   let query = supabase
-    .from('collaborators')
-    .select('*, branch:branches(*)')
+    .from('suppliers')
+    .select('*')
     .eq('funeral_home_id', profile.funeral_home_id)
-    .order('nombre_completo', { ascending: true })
+    .order('nombre', { ascending: true })
 
-  if (filters?.type) {
-    query = query.eq('type', filters.type)
+  if (filters?.tipo_negocio) {
+    query = query.eq('tipo_negocio', filters.tipo_negocio)
   }
 
   if (filters?.estado_activo !== undefined) {
@@ -44,7 +44,7 @@ export async function getCollaborators(filters?: {
   }
 
   if (filters?.search) {
-    query = query.or(`nombre_completo.ilike.%${filters.search}%,rut.ilike.%${filters.search}%,cargo.ilike.%${filters.search}%`)
+    query = query.or(`nombre.ilike.%${filters.search}%,rut.ilike.%${filters.search}%,tipo_negocio.ilike.%${filters.search}%`)
   }
 
   const { data, error } = await query
@@ -56,7 +56,7 @@ export async function getCollaborators(filters?: {
   return data
 }
 
-export async function getCollaborator(id: string) {
+export async function getSupplier(id: string) {
   const supabase = await createClient()
 
   const {
@@ -67,11 +67,7 @@ export async function getCollaborator(id: string) {
     throw new Error('No autenticado')
   }
 
-  const { data, error } = await supabase
-    .from('collaborators')
-    .select('*, branch:branches(*)')
-    .eq('id', id)
-    .single()
+  const { data, error } = await supabase.from('suppliers').select('*').eq('id', id).single()
 
   if (error) {
     throw error
@@ -80,7 +76,7 @@ export async function getCollaborator(id: string) {
   return data
 }
 
-export async function createCollaborator(input: CollaboratorInput) {
+export async function createSupplier(input: SupplierInput) {
   const supabase = await createClient()
 
   const {
@@ -91,7 +87,7 @@ export async function createCollaborator(input: CollaboratorInput) {
     throw new Error('No autenticado')
   }
 
-  const validated = collaboratorSchema.parse(input)
+  const validated = supplierSchema.parse(input)
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -104,7 +100,7 @@ export async function createCollaborator(input: CollaboratorInput) {
   }
 
   const { data, error } = await supabase
-    .from('collaborators')
+    .from('suppliers')
     .insert({
       ...validated,
       funeral_home_id: profile.funeral_home_id,
@@ -113,17 +109,14 @@ export async function createCollaborator(input: CollaboratorInput) {
     .single()
 
   if (error) {
-    if (error.code === '23505') {
-      throw new Error('Ya existe un colaborador con este RUT')
-    }
     throw error
   }
 
-  revalidatePath('/administracion/colaboradores')
+  revalidatePath('/administracion/proveedores')
   return data
 }
 
-export async function updateCollaborator(id: string, input: Partial<CollaboratorInput>) {
+export async function updateSupplier(id: string, input: Partial<SupplierInput>) {
   const supabase = await createClient()
 
   const {
@@ -134,27 +127,19 @@ export async function updateCollaborator(id: string, input: Partial<Collaborator
     throw new Error('No autenticado')
   }
 
-  const validated = collaboratorSchema.partial().parse(input)
+  const validated = supplierSchema.partial().parse(input)
 
-  const { data, error } = await supabase
-    .from('collaborators')
-    .update(validated)
-    .eq('id', id)
-    .select()
-    .single()
+  const { data, error } = await supabase.from('suppliers').update(validated).eq('id', id).select().single()
 
   if (error) {
-    if (error.code === '23505') {
-      throw new Error('Ya existe un colaborador con este RUT')
-    }
     throw error
   }
 
-  revalidatePath('/administracion/colaboradores')
+  revalidatePath('/administracion/proveedores')
   return data
 }
 
-export async function deleteCollaborator(id: string) {
+export async function deleteSupplier(id: string) {
   const supabase = await createClient()
 
   const {
@@ -165,14 +150,14 @@ export async function deleteCollaborator(id: string) {
     throw new Error('No autenticado')
   }
 
-  const { error } = await supabase.from('collaborators').delete().eq('id', id)
+  const { error } = await supabase.from('suppliers').delete().eq('id', id)
 
   if (error) {
     if (error.code === '23503') {
-      throw new Error('No se puede eliminar el colaborador porque tiene servicios asignados')
+      throw new Error('No se puede eliminar el proveedor porque tiene egresos asociados')
     }
     throw error
   }
 
-  revalidatePath('/administracion/colaboradores')
+  revalidatePath('/administracion/proveedores')
 }

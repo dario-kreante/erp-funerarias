@@ -2,10 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { collaboratorSchema, type CollaboratorInput } from '@/lib/validations/catalogs'
+import { cemeteryCrematoriumSchema, type CemeteryCrematoriumInput } from '@/lib/validations/catalogs'
 
-export async function getCollaborators(filters?: {
-  type?: 'empleado' | 'honorario'
+export async function getCemeteryCrematoriums(filters?: {
+  tipo?: 'cementerio' | 'crematorio'
   estado_activo?: boolean
   search?: string
 }) {
@@ -30,13 +30,13 @@ export async function getCollaborators(filters?: {
   }
 
   let query = supabase
-    .from('collaborators')
-    .select('*, branch:branches(*)')
+    .from('cemetery_crematoriums')
+    .select('*')
     .eq('funeral_home_id', profile.funeral_home_id)
-    .order('nombre_completo', { ascending: true })
+    .order('nombre', { ascending: true })
 
-  if (filters?.type) {
-    query = query.eq('type', filters.type)
+  if (filters?.tipo) {
+    query = query.eq('tipo', filters.tipo)
   }
 
   if (filters?.estado_activo !== undefined) {
@@ -44,7 +44,7 @@ export async function getCollaborators(filters?: {
   }
 
   if (filters?.search) {
-    query = query.or(`nombre_completo.ilike.%${filters.search}%,rut.ilike.%${filters.search}%,cargo.ilike.%${filters.search}%`)
+    query = query.or(`nombre.ilike.%${filters.search}%,direccion.ilike.%${filters.search}%`)
   }
 
   const { data, error } = await query
@@ -56,7 +56,7 @@ export async function getCollaborators(filters?: {
   return data
 }
 
-export async function getCollaborator(id: string) {
+export async function getCemeteryCrematorium(id: string) {
   const supabase = await createClient()
 
   const {
@@ -67,11 +67,7 @@ export async function getCollaborator(id: string) {
     throw new Error('No autenticado')
   }
 
-  const { data, error } = await supabase
-    .from('collaborators')
-    .select('*, branch:branches(*)')
-    .eq('id', id)
-    .single()
+  const { data, error } = await supabase.from('cemetery_crematoriums').select('*').eq('id', id).single()
 
   if (error) {
     throw error
@@ -80,7 +76,7 @@ export async function getCollaborator(id: string) {
   return data
 }
 
-export async function createCollaborator(input: CollaboratorInput) {
+export async function createCemeteryCrematorium(input: CemeteryCrematoriumInput) {
   const supabase = await createClient()
 
   const {
@@ -91,7 +87,7 @@ export async function createCollaborator(input: CollaboratorInput) {
     throw new Error('No autenticado')
   }
 
-  const validated = collaboratorSchema.parse(input)
+  const validated = cemeteryCrematoriumSchema.parse(input)
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -104,7 +100,7 @@ export async function createCollaborator(input: CollaboratorInput) {
   }
 
   const { data, error } = await supabase
-    .from('collaborators')
+    .from('cemetery_crematoriums')
     .insert({
       ...validated,
       funeral_home_id: profile.funeral_home_id,
@@ -113,17 +109,14 @@ export async function createCollaborator(input: CollaboratorInput) {
     .single()
 
   if (error) {
-    if (error.code === '23505') {
-      throw new Error('Ya existe un colaborador con este RUT')
-    }
     throw error
   }
 
-  revalidatePath('/administracion/colaboradores')
+  revalidatePath('/administracion/cementerios-crematorios')
   return data
 }
 
-export async function updateCollaborator(id: string, input: Partial<CollaboratorInput>) {
+export async function updateCemeteryCrematorium(id: string, input: Partial<CemeteryCrematoriumInput>) {
   const supabase = await createClient()
 
   const {
@@ -134,27 +127,24 @@ export async function updateCollaborator(id: string, input: Partial<Collaborator
     throw new Error('No autenticado')
   }
 
-  const validated = collaboratorSchema.partial().parse(input)
+  const validated = cemeteryCrematoriumSchema.partial().parse(input)
 
   const { data, error } = await supabase
-    .from('collaborators')
+    .from('cemetery_crematoriums')
     .update(validated)
     .eq('id', id)
     .select()
     .single()
 
   if (error) {
-    if (error.code === '23505') {
-      throw new Error('Ya existe un colaborador con este RUT')
-    }
     throw error
   }
 
-  revalidatePath('/administracion/colaboradores')
+  revalidatePath('/administracion/cementerios-crematorios')
   return data
 }
 
-export async function deleteCollaborator(id: string) {
+export async function deleteCemeteryCrematorium(id: string) {
   const supabase = await createClient()
 
   const {
@@ -165,14 +155,14 @@ export async function deleteCollaborator(id: string) {
     throw new Error('No autenticado')
   }
 
-  const { error } = await supabase.from('collaborators').delete().eq('id', id)
+  const { error } = await supabase.from('cemetery_crematoriums').delete().eq('id', id)
 
   if (error) {
     if (error.code === '23503') {
-      throw new Error('No se puede eliminar el colaborador porque tiene servicios asignados')
+      throw new Error('No se puede eliminar porque está siendo usado en servicios')
     }
     throw error
   }
 
-  revalidatePath('/administracion/colaboradores')
+  revalidatePath('/administracion/cementerios-crematorios')
 }
