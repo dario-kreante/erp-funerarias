@@ -171,3 +171,7 @@ export const deathPlaceTypeEnum = z.enum(['domicilio', 'hospital', 'via_publica'
 export const serviceItemTypeEnum = z.enum(['plan', 'ataud', 'urna', 'extra'])
 
 export const procedureStatusEnum = z.enum(['pendiente', 'en_proceso', 'completo'])
+
+export const payrollPeriodStatusEnum = z.enum(['abierto', 'cerrado', 'procesado', 'pagado'])
+
+export const paymentReceiptStatusEnum = z.enum(['pendiente', 'generado', 'enviado', 'pagado'])

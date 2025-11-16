@@ -16,6 +16,8 @@ export type VehicleStatus = 'disponible' | 'en_mantenimiento'
 export type DeathPlaceType = 'domicilio' | 'hospital' | 'via_publica' | 'otro'
 export type ServiceItemType = 'plan' | 'ataud' | 'urna' | 'extra'
 export type ProcedureStatus = 'pendiente' | 'en_proceso' | 'completo'
+export type PayrollPeriodStatus = 'abierto' | 'cerrado' | 'procesado' | 'pagado'
+export type PaymentReceiptStatus = 'pendiente' | 'generado' | 'enviado' | 'pagado'
 
 // Complete Database interface with Spanish column names
 export interface Database {
@@ -378,6 +380,84 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['activity_logs']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['activity_logs']['Insert']>
       }
+      payroll_periods: {
+        Row: {
+          id: string
+          funeral_home_id: string
+          nombre: string
+          fecha_inicio: string
+          fecha_fin: string
+          estado: PayrollPeriodStatus
+          notas: string | null
+          total_bruto: number
+          total_deducciones: number
+          total_neto: number
+          cantidad_colaboradores: number
+          fecha_cierre: string | null
+          cerrado_por: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['payroll_periods']['Row'], 'id' | 'created_at' | 'updated_at' | 'total_bruto' | 'total_deducciones' | 'total_neto' | 'cantidad_colaboradores'>
+        Update: Partial<Database['public']['Tables']['payroll_periods']['Insert']>
+      }
+      payroll_records: {
+        Row: {
+          id: string
+          payroll_period_id: string
+          collaborator_id: string
+          funeral_home_id: string
+          sueldo_base: number
+          dias_trabajados: number
+          cantidad_servicios: number
+          total_extras: number
+          bonos: number
+          comisiones: number
+          descuentos: number
+          adelantos: number
+          total_bruto: number
+          total_deducciones: number
+          total_neto: number
+          aprobado: boolean
+          fecha_aprobacion: string | null
+          aprobado_por: string | null
+          notas: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['payroll_records']['Row'], 'id' | 'created_at' | 'updated_at' | 'total_bruto' | 'total_deducciones' | 'total_neto'>
+        Update: Partial<Database['public']['Tables']['payroll_records']['Insert']>
+      }
+      payment_receipts: {
+        Row: {
+          id: string
+          payroll_record_id: string
+          funeral_home_id: string
+          numero_recibo: string
+          fecha_emision: string
+          colaborador_nombre: string
+          colaborador_rut: string
+          periodo_nombre: string
+          sueldo_base: number
+          extras: number
+          bonos: number
+          comisiones: number
+          total_bruto: number
+          descuentos: number
+          adelantos: number
+          total_deducciones: number
+          total_neto: number
+          estado: PaymentReceiptStatus
+          metodo_pago: string | null
+          fecha_pago: string | null
+          codigo_verificacion: string | null
+          notas: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['payment_receipts']['Row'], 'id' | 'numero_recibo' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['payment_receipts']['Insert']>
+      }
     }
     Views: {
       service_summary: {
@@ -413,6 +493,31 @@ export interface Database {
           cantidad_servicios: number
           total_extras: number
           total_a_pagar: number
+        }
+      }
+      collaborator_payroll_history: {
+        Row: {
+          collaborator_id: string
+          nombre_completo: string
+          rut: string
+          tipo_colaborador: CollaboratorType
+          periodo_id: string
+          periodo_nombre: string
+          fecha_inicio: string
+          fecha_fin: string
+          sueldo_base: number
+          cantidad_servicios: number
+          total_extras: number
+          bonos: number
+          comisiones: number
+          total_bruto: number
+          descuentos: number
+          adelantos: number
+          total_deducciones: number
+          total_neto: number
+          aprobado: boolean
+          periodo_estado: PayrollPeriodStatus
+          created_at: string
         }
       }
     }
@@ -471,6 +576,12 @@ export type ActivityLog = Tables<'activity_logs'>
 // View types
 export type ServiceSummary = Views<'service_summary'>
 export type PayrollSummary = Views<'payroll_summary'>
+export type CollaboratorPayrollHistory = Views<'collaborator_payroll_history'>
+
+// Payroll table types
+export type PayrollPeriod = Tables<'payroll_periods'>
+export type PayrollRecord = Tables<'payroll_records'>
+export type PaymentReceipt = Tables<'payment_receipts'>
 
 // Insert types
 export type FuneralHomeInsert = TablesInsert<'funeral_homes'>
@@ -507,6 +618,12 @@ export type TransactionUpdate = TablesUpdate<'transactions'>
 export type ExpenseUpdate = TablesUpdate<'expenses'>
 export type ServiceAssignmentUpdate = TablesUpdate<'service_assignments'>
 export type MortuaryQuotaUpdate = TablesUpdate<'mortuary_quotas'>
+export type PayrollPeriodInsert = TablesInsert<'payroll_periods'>
+export type PayrollPeriodUpdate = TablesUpdate<'payroll_periods'>
+export type PayrollRecordInsert = TablesInsert<'payroll_records'>
+export type PayrollRecordUpdate = TablesUpdate<'payroll_records'>
+export type PaymentReceiptInsert = TablesInsert<'payment_receipts'>
+export type PaymentReceiptUpdate = TablesUpdate<'payment_receipts'>
 
 // Extended types with relations (useful for queries with joins)
 export type ServiceWithDetails = Service & {
@@ -535,4 +652,21 @@ export type TransactionWithService = Transaction & {
 export type ExpenseWithSupplier = Expense & {
   supplier?: Supplier | null
   service?: Service | null
+}
+
+export type PayrollPeriodWithRecords = PayrollPeriod & {
+  records?: PayrollRecordWithCollaborator[]
+}
+
+export type PayrollRecordWithCollaborator = PayrollRecord & {
+  collaborator?: Collaborator
+  receipt?: PaymentReceipt | null
+}
+
+export type PaymentReceiptWithDetails = PaymentReceipt & {
+  payroll_record?: PayrollRecordWithCollaborator
+}
+
+export type ServiceAssignmentWithService = ServiceAssignment & {
+  service?: Service
 }
