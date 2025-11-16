@@ -14,13 +14,13 @@ import { useBranch } from '@/lib/contexts/BranchContext'
 import { cx } from '@/lib/utils/cx'
 import type { AgendaEvent, EventType, Branch, Service, AgendaResourceBooking } from '@/types/database'
 import {
-  PlusIcon,
-  CalendarIcon,
-  FilterLinesIcon,
-  RefreshCw05Icon,
-  ListIcon,
-  Grid01Icon,
-} from '@untitledui/icons-react/outline'
+  Plus,
+  Calendar,
+  FilterLines,
+  RefreshCw05,
+  List,
+  Grid01,
+} from '@untitledui/icons'
 
 interface CalendarEventData {
   id: string
@@ -190,7 +190,7 @@ export function AgendaClient({ initialEvents, branches, funeralHomeId }: AgendaC
             variant="secondary"
             onPress={() => setShowFilters(!showFilters)}
           >
-            <FilterLinesIcon className="w-4 h-4 mr-2" />
+            <FilterLines className="w-4 h-4 mr-2" />
             Filtros
           </Button>
           <Button
@@ -198,11 +198,11 @@ export function AgendaClient({ initialEvents, branches, funeralHomeId }: AgendaC
             onPress={handleEventUpdate}
             isDisabled={isLoading}
           >
-            <RefreshCw05Icon className={cx('w-4 h-4 mr-2', isLoading && 'animate-spin')} />
+            <RefreshCw05 className={cx('w-4 h-4 mr-2', isLoading && 'animate-spin')} />
             Actualizar
           </Button>
           <Button variant="primary" onPress={() => setShowCreateEvent(true)}>
-            <PlusIcon className="w-4 h-4 mr-2" />
+            <Plus className="w-4 h-4 mr-2" />
             Nuevo evento
           </Button>
         </div>
@@ -217,7 +217,7 @@ export function AgendaClient({ initialEvents, branches, funeralHomeId }: AgendaC
               <p className="text-2xl font-semibold text-gray-900 mt-1">{stats.eventosHoy}</p>
             </div>
             <div className="p-3 bg-primary-100 rounded-lg">
-              <CalendarIcon className="w-6 h-6 text-primary-600" />
+              <Calendar className="w-6 h-6 text-primary-600" />
             </div>
           </div>
         </Card>
@@ -228,7 +228,7 @@ export function AgendaClient({ initialEvents, branches, funeralHomeId }: AgendaC
               <p className="text-2xl font-semibold text-gray-900 mt-1">{stats.eventosSemana}</p>
             </div>
             <div className="p-3 bg-green-100 rounded-lg">
-              <Grid01Icon className="w-6 h-6 text-green-600" />
+              <Grid01 className="w-6 h-6 text-green-600" />
             </div>
           </div>
         </Card>
@@ -239,7 +239,7 @@ export function AgendaClient({ initialEvents, branches, funeralHomeId }: AgendaC
               <p className="text-2xl font-semibold text-gray-900 mt-1">{stats.eventosPendientes}</p>
             </div>
             <div className="p-3 bg-yellow-100 rounded-lg">
-              <ListIcon className="w-6 h-6 text-yellow-600" />
+              <List className="w-6 h-6 text-yellow-600" />
             </div>
           </div>
         </Card>

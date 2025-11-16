@@ -97,7 +97,7 @@ function AlertItemComponent({ alert }: { alert: AlertItem }) {
 
   if (alert.enlace) {
     return (
-      <Link href={alert.enlace} className="block">
+      <Link href={alert.enlace as '/dashboard'} className="block">
         {content}
       </Link>
     )

@@ -15,11 +15,11 @@ import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@
 import { getRooms, createRoom, updateRoom, deleteRoom } from '@/lib/actions/agenda'
 import type { Room } from '@/types/database'
 import {
-  PlusIcon,
-  Edit03Icon,
-  Trash01Icon,
-  Building07Icon,
-} from '@untitledui/icons-react/outline'
+  Plus,
+  Edit03,
+  Trash01,
+  Building07,
+} from '@untitledui/icons'
 
 const roomFormSchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
@@ -165,7 +165,7 @@ export function RoomManagement({ funeralHomeId, branchId }: RoomManagementProps)
           <p className="text-sm text-gray-500">Administra las salas de velatorio y ceremonias</p>
         </div>
         <Button variant="primary" onPress={() => setShowCreateModal(true)}>
-          <PlusIcon className="w-4 h-4 mr-2" />
+          <Plus className="w-4 h-4 mr-2" />
           Nueva sala
         </Button>
       </div>
@@ -177,10 +177,10 @@ export function RoomManagement({ funeralHomeId, branchId }: RoomManagementProps)
           <div className="p-8 text-center text-gray-500">Cargando salas...</div>
         ) : rooms.length === 0 ? (
           <div className="p-8 text-center">
-            <Building07Icon className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+            <Building07 className="w-12 h-12 mx-auto text-gray-400 mb-3" />
             <p className="text-gray-500">No hay salas registradas</p>
             <Button variant="primary" className="mt-4" onPress={() => setShowCreateModal(true)}>
-              <PlusIcon className="w-4 h-4 mr-2" />
+              <Plus className="w-4 h-4 mr-2" />
               Crear primera sala
             </Button>
           </div>
@@ -228,14 +228,14 @@ export function RoomManagement({ funeralHomeId, branchId }: RoomManagementProps)
                         size="sm"
                         onPress={() => openEditModal(room)}
                       >
-                        <Edit03Icon className="w-4 h-4" />
+                        <Edit03 className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onPress={() => setDeletingRoom(room)}
                       >
-                        <Trash01Icon className="w-4 h-4 text-error-600" />
+                        <Trash01 className="w-4 h-4 text-error-600" />
                       </Button>
                     </div>
                   </TableCell>

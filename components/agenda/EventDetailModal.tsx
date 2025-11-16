@@ -10,14 +10,14 @@ import { deleteAgendaEvent, updateEventStatus } from '@/lib/actions/agenda'
 import { formatDateTime, formatRelativeTime } from '@/lib/utils/date'
 import type { AgendaEvent, EventType } from '@/types/database'
 import {
-  CalendarIcon,
-  ClockIcon,
-  File04Icon,
-  Edit03Icon,
-  Trash01Icon,
-  CheckCircleIcon,
-  XCircleIcon,
-} from '@untitledui/icons-react/outline'
+  Calendar,
+  Clock,
+  File04,
+  Edit03,
+  Trash01,
+  CheckCircle,
+  XCircle,
+} from '@untitledui/icons'
 
 interface EventDetailModalProps {
   event: AgendaEvent & {
@@ -151,7 +151,7 @@ export function EventDetailModal({
           {/* Dates */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-3">
             <div className="flex items-center gap-3">
-              <CalendarIcon className="w-5 h-5 text-gray-400" />
+              <Calendar className="w-5 h-5 text-gray-400" />
               <div>
                 <p className="text-sm font-medium text-gray-900">
                   {formatDateTime(event.fecha_inicio)}
@@ -162,7 +162,7 @@ export function EventDetailModal({
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <ClockIcon className="w-5 h-5 text-gray-400" />
+              <Clock className="w-5 h-5 text-gray-400" />
               <div>
                 <p className="text-sm text-gray-700">
                   Hasta: {formatDateTime(event.fecha_fin)}
@@ -180,7 +180,7 @@ export function EventDetailModal({
           {event.descripcion && (
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <File04Icon className="w-4 h-4" />
+                <File04 className="w-4 h-4" />
                 Descripción
               </h4>
               <p className="text-sm text-gray-600 whitespace-pre-wrap">
@@ -241,7 +241,7 @@ export function EventDetailModal({
                     onPress={() => handleStatusChange('completado')}
                     isDisabled={isPending}
                   >
-                    <CheckCircleIcon className="w-4 h-4 mr-1" />
+                    <CheckCircle className="w-4 h-4 mr-1" />
                     Marcar completado
                   </Button>
                 )}
@@ -251,7 +251,7 @@ export function EventDetailModal({
                   onPress={() => handleStatusChange('cancelado')}
                   isDisabled={isPending}
                 >
-                  <XCircleIcon className="w-4 h-4 mr-1" />
+                  <XCircle className="w-4 h-4 mr-1" />
                   Cancelar evento
                 </Button>
               </div>
@@ -266,7 +266,7 @@ export function EventDetailModal({
             onPress={() => setShowDeleteConfirm(true)}
             isDisabled={isPending}
           >
-            <Trash01Icon className="w-4 h-4 mr-2" />
+            <Trash01 className="w-4 h-4 mr-2" />
             Eliminar
           </Button>
           <div className="flex gap-3">
@@ -274,7 +274,7 @@ export function EventDetailModal({
               Cerrar
             </Button>
             <Button variant="primary" onPress={() => setIsEditing(true)}>
-              <Edit03Icon className="w-4 h-4 mr-2" />
+              <Edit03 className="w-4 h-4 mr-2" />
               Editar
             </Button>
           </div>
