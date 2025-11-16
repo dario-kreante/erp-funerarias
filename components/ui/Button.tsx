@@ -1,6 +1,6 @@
 import { Button as AriaButton, ButtonProps as AriaButtonProps } from 'react-aria-components'
 import { cx } from '@/lib/utils/cx'
-import { Loader2Icon } from '@untitledui/icons-react'
+import { Loading02 } from '@untitledui/icons'
 
 export interface ButtonProps extends AriaButtonProps {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'link'
@@ -46,11 +46,11 @@ export function Button({
         'disabled:cursor-not-allowed disabled:opacity-60',
         variantStyles[variant],
         sizeStyles[size],
-        className
+        typeof className === 'string' ? className : undefined
       )}
     >
-      {isLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
-      {isLoading && loadingText ? loadingText : children}
+      {isLoading && <Loading02 className="h-4 w-4 animate-spin" />}
+      {isLoading && loadingText ? loadingText : (typeof children === 'function' ? null : children)}
     </AriaButton>
   )
 }

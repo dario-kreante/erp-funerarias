@@ -1,5 +1,5 @@
 import { cx } from '@/lib/utils/cx'
-import { Loader2Icon } from '@untitledui/icons-react'
+import { Loading02 } from '@untitledui/icons'
 
 export interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -18,7 +18,7 @@ const sizeStyles = {
 export function LoadingSpinner({ size = 'md', className, fullScreen, text }: LoadingSpinnerProps) {
   const spinner = (
     <div className={cx('flex flex-col items-center justify-center gap-3', className)}>
-      <Loader2Icon className={cx('animate-spin text-primary-600', sizeStyles[size])} />
+      <Loading02 className={cx('animate-spin text-primary-600', sizeStyles[size])} />
       {text && <p className="text-sm text-gray-600">{text}</p>}
     </div>
   )

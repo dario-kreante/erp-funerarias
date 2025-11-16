@@ -1,11 +1,11 @@
 import { ReactNode } from 'react'
 import { cx } from '@/lib/utils/cx'
 import {
-  InfoCircleIcon,
-  CheckCircleIcon,
-  AlertTriangleIcon,
-  AlertCircleIcon
-} from '@untitledui/icons-react'
+  InfoCircle,
+  CheckCircle,
+  AlertTriangle,
+  AlertCircle
+} from '@untitledui/icons'
 
 export interface AlertProps {
   variant?: 'info' | 'success' | 'warning' | 'error'
@@ -20,25 +20,25 @@ const variantStyles = {
     container: 'bg-blue-50 border-blue-200 text-blue-800',
     icon: 'text-blue-400',
     title: 'text-blue-800',
-    Icon: InfoCircleIcon
+    Icon: InfoCircle
   },
   success: {
     container: 'bg-success-50 border-success-200 text-success-800',
     icon: 'text-success-400',
     title: 'text-success-800',
-    Icon: CheckCircleIcon
+    Icon: CheckCircle
   },
   warning: {
     container: 'bg-warning-50 border-warning-200 text-warning-800',
     icon: 'text-warning-400',
     title: 'text-warning-800',
-    Icon: AlertTriangleIcon
+    Icon: AlertTriangle
   },
   error: {
     container: 'bg-error-50 border-error-200 text-error-800',
     icon: 'text-error-400',
     title: 'text-error-800',
-    Icon: AlertCircleIcon
+    Icon: AlertCircle
   }
 }
 
