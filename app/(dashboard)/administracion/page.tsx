@@ -9,6 +9,7 @@ const adminLinks = [
   { name: 'Vehículos', href: '/administracion/vehiculos' },
   { name: 'Proveedores', href: '/administracion/proveedores' },
   { name: 'Usuarios', href: '/administracion/usuarios' },
+  { name: 'Sucursales', href: '/administracion/sucursales' },
   { name: 'Configuración Funeraria', href: '/administracion/funeraria' },
 ]
 
