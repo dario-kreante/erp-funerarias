@@ -341,3 +341,60 @@ export async function getBranchStats(branchId: string) {
     total_services: servicesResult.count || 0,
   }
 }
+
+export async function getUserBranches() {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return []
+  }
+
+  const { data, error } = await supabase
+    .from('user_branches')
+    .select(`
+      branch_id,
+      branches (
+        id,
+        nombre,
+        direccion,
+        telefono,
+        email,
+        activa
+      )
+    `)
+    .eq('user_id', user.id)
+
+  if (error || !data) {
+    return []
+  }
+
+  return data.map((ub: any) => ub.branches).filter(Boolean)
+}
+
+export async function getUserProfile() {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return null
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  if (error) {
+    return null
+  }
+
+  return data
+}

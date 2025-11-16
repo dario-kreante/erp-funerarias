@@ -117,7 +117,7 @@ export default async function PayrollPage() {
         {modules.map((module) => (
           <Link
             key={module.href}
-            href={module.href}
+            href={module.href as '/dashboard'}
             className="block rounded-lg bg-white p-6 shadow transition-shadow hover:shadow-lg"
           >
             <div className="flex items-start space-x-4">

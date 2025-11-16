@@ -65,7 +65,7 @@ export default async function CollaboratorDetailPage({
           </span>
         </div>
         <Link
-          href={`/nomina/colaboradores/${collaborator.id}/editar`}
+          href={`/nomina/colaboradores/${collaborator.id}/editar` as '/dashboard'}
           className={cx(
             'inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white',
             'shadow-sm hover:bg-blue-500'
