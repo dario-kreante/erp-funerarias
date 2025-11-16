@@ -175,3 +175,25 @@ export const procedureStatusEnum = z.enum(['pendiente', 'en_proceso', 'completo'
 export const payrollPeriodStatusEnum = z.enum(['abierto', 'cerrado', 'procesado', 'pagado'])
 
 export const paymentReceiptStatusEnum = z.enum(['pendiente', 'generado', 'enviado', 'pagado'])
+
+export const eventTypeEnum = z.enum([
+  'velatorio',
+  'ceremonia',
+  'cremacion',
+  'inhumacion',
+  'recogida',
+  'reunion',
+  'mantenimiento',
+  'otro',
+])
+
+export const resourceTypeEnum = z.enum(['sala', 'vehiculo', 'colaborador', 'equipamiento'])
+
+export const eventStatusEnum = z.enum(['programado', 'en_progreso', 'completado', 'cancelado'])
+
+// Color validation (hex format)
+export const hexColorSchema = z
+  .string()
+  .regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser en formato hexadecimal (#RRGGBB)')
+
+export const optionalHexColorSchema = hexColorSchema.optional().nullable()

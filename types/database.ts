@@ -18,6 +18,9 @@ export type ServiceItemType = 'plan' | 'ataud' | 'urna' | 'extra'
 export type ProcedureStatus = 'pendiente' | 'en_proceso' | 'completo'
 export type PayrollPeriodStatus = 'abierto' | 'cerrado' | 'procesado' | 'pagado'
 export type PaymentReceiptStatus = 'pendiente' | 'generado' | 'enviado' | 'pagado'
+export type EventType = 'velatorio' | 'ceremonia' | 'cremacion' | 'inhumacion' | 'recogida' | 'reunion' | 'mantenimiento' | 'otro'
+export type ResourceType = 'sala' | 'vehiculo' | 'colaborador' | 'equipamiento'
+export type EventStatus = 'programado' | 'en_progreso' | 'completado' | 'cancelado'
 
 // Complete Database interface with Spanish column names
 export interface Database {
@@ -458,6 +461,65 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['payment_receipts']['Row'], 'id' | 'numero_recibo' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['payment_receipts']['Insert']>
       }
+      rooms: {
+        Row: {
+          id: string
+          funeral_home_id: string
+          branch_id: string
+          nombre: string
+          descripcion: string | null
+          capacidad: number | null
+          ubicacion: string | null
+          equipamiento: string[] | null
+          estado_activo: boolean
+          color: string
+          notas: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['rooms']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['rooms']['Insert']>
+      }
+      agenda_events: {
+        Row: {
+          id: string
+          funeral_home_id: string
+          branch_id: string
+          service_id: string | null
+          titulo: string
+          descripcion: string | null
+          tipo_evento: EventType
+          fecha_inicio: string
+          fecha_fin: string
+          todo_el_dia: boolean
+          es_recurrente: boolean
+          patron_recurrencia: Record<string, any> | null
+          color: string | null
+          estado: EventStatus
+          notas: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['agenda_events']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['agenda_events']['Insert']>
+      }
+      agenda_resource_bookings: {
+        Row: {
+          id: string
+          event_id: string
+          tipo_recurso: ResourceType
+          recurso_id: string
+          fecha_inicio_reserva: string | null
+          fecha_fin_reserva: string | null
+          confirmado: boolean
+          notas: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['agenda_resource_bookings']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['agenda_resource_bookings']['Insert']>
+      }
     }
     Views: {
       service_summary: {
@@ -572,6 +634,9 @@ export type MortuaryQuota = Tables<'mortuary_quotas'>
 export type Document = Tables<'documents'>
 export type ServiceProcedure = Tables<'service_procedures'>
 export type ActivityLog = Tables<'activity_logs'>
+export type Room = Tables<'rooms'>
+export type AgendaEvent = Tables<'agenda_events'>
+export type AgendaResourceBooking = Tables<'agenda_resource_bookings'>
 
 // View types
 export type ServiceSummary = Views<'service_summary'>
@@ -601,6 +666,9 @@ export type ServiceAssignmentInsert = TablesInsert<'service_assignments'>
 export type MortuaryQuotaInsert = TablesInsert<'mortuary_quotas'>
 export type DocumentInsert = TablesInsert<'documents'>
 export type ServiceProcedureInsert = TablesInsert<'service_procedures'>
+export type RoomInsert = TablesInsert<'rooms'>
+export type AgendaEventInsert = TablesInsert<'agenda_events'>
+export type AgendaResourceBookingInsert = TablesInsert<'agenda_resource_bookings'>
 
 // Update types
 export type FuneralHomeUpdate = TablesUpdate<'funeral_homes'>
@@ -624,6 +692,9 @@ export type PayrollRecordInsert = TablesInsert<'payroll_records'>
 export type PayrollRecordUpdate = TablesUpdate<'payroll_records'>
 export type PaymentReceiptInsert = TablesInsert<'payment_receipts'>
 export type PaymentReceiptUpdate = TablesUpdate<'payment_receipts'>
+export type RoomUpdate = TablesUpdate<'rooms'>
+export type AgendaEventUpdate = TablesUpdate<'agenda_events'>
+export type AgendaResourceBookingUpdate = TablesUpdate<'agenda_resource_bookings'>
 
 // Extended types with relations (useful for queries with joins)
 export type ServiceWithDetails = Service & {
@@ -669,4 +740,18 @@ export type PaymentReceiptWithDetails = PaymentReceipt & {
 
 export type ServiceAssignmentWithService = ServiceAssignment & {
   service?: Service
+}
+
+export type AgendaEventWithDetails = AgendaEvent & {
+  service?: Service | null
+  resource_bookings?: (AgendaResourceBooking & {
+    room?: Room | null
+    vehicle?: Vehicle | null
+    collaborator?: Collaborator | null
+  })[]
+  branch?: Branch
+}
+
+export type RoomWithBranch = Room & {
+  branch?: Branch
 }

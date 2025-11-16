@@ -27,3 +27,6 @@ export * from './document'
 export * from './branch'
 export * from './funeral-home'
 export * from './user'
+
+// Agenda and calendar schemas
+export * from './agenda'
