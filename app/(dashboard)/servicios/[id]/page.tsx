@@ -8,16 +8,18 @@ export default async function ServiceDetailPage({
 }: {
   params: { id: string }
 }) {
-  let service
+  let serviceResult
   try {
-    service = await getService(params.id)
+    serviceResult = await getService(params.id)
   } catch (error) {
     notFound()
   }
 
-  if (!service) {
+  if (!serviceResult || !serviceResult.success) {
     notFound()
   }
+
+  const service = serviceResult.data as any
 
   const paidAmount = service.transactions
     ?.filter((t: any) => t.status === 'pagado')

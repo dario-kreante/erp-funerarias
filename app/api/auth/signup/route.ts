@@ -1,20 +1,43 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { checkRateLimit, getRateLimitHeaders, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { headers } from 'next/headers'
 
 const signupSchema = z.object({
-  fullName: z.string().min(3),
-  email: z.string().email(),
-  password: z.string().min(8),
-  funeralHomeLegalName: z.string().min(3),
+  fullName: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+  email: z.string().email('Correo electrónico inválido'),
+  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+  funeralHomeLegalName: z.string().min(3, 'La razón social debe tener al menos 3 caracteres'),
   funeralHomeTradeName: z.string().optional().default(''),
-  funeralHomeRut: z.string().min(3),
-  branchName: z.string().min(2).default('Casa matriz'),
+  funeralHomeRut: z.string().min(3, 'El RUT es requerido'),
+  branchName: z.string().min(2, 'El nombre de sucursal debe tener al menos 2 caracteres').default('Casa matriz'),
   branchAddress: z.string().optional().default(''),
 })
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting - check by IP address
+    const headersList = await headers()
+    const ip = headersList.get('x-forwarded-for')?.split(',')[0] ||
+               headersList.get('x-real-ip') ||
+               'unknown'
+
+    const rateLimitResult = checkRateLimit(`signup:${ip}`, RATE_LIMITS.signup)
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Demasiados intentos de registro. Por favor espera antes de intentar nuevamente.',
+          retryAfter: rateLimitResult.retryAfter
+        },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult)
+        }
+      )
+    }
+
     const json = await request.json()
     const payload = signupSchema.parse(json)
 
@@ -198,15 +221,26 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json(
+      { success: true },
+      { headers: getRateLimitHeaders(rateLimitResult) }
+    )
   } catch (error) {
     if (error instanceof z.ZodError) {
+      const fieldErrors = error.issues.map(err => ({
+        field: err.path.join('.'),
+        message: err.message
+      }))
       return NextResponse.json(
-        { error: 'Datos inválidos. Revisa la información ingresada.' },
+        {
+          error: 'Datos inválidos. Revisa la información ingresada.',
+          fieldErrors
+        },
         { status: 400 }
       )
     }
 
+    console.error('Signup error:', error)
     return NextResponse.json(
       { error: 'Ha ocurrido un error inesperado al crear la cuenta' },
       { status: 500 }

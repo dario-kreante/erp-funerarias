@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { cx } from '@/lib/utils/cx'
 
-const adminLinks = [
+const adminLinks: { name: string; href: string }[] = [
   { name: 'Colaboradores', href: '/administracion/colaboradores' },
   { name: 'Planes', href: '/administracion/planes' },
   { name: 'Ataúdes y Urnas', href: '/administracion/ataudes-urnas' },
-  { name: 'Cementerios', href: '/administracion/cementerios' },
+  { name: 'Cementerios', href: '/administracion/cementerios-crematorios' },
   { name: 'Vehículos', href: '/administracion/vehiculos' },
   { name: 'Proveedores', href: '/administracion/proveedores' },
   { name: 'Usuarios', href: '/administracion/usuarios' },
@@ -20,7 +20,7 @@ export default function AdministrationPage() {
         {adminLinks.map((link) => (
           <Link
             key={link.href}
-            href={link.href}
+            href={link.href as '/dashboard'}
             className={cx(
               "rounded-lg border border-gray-200 bg-white p-6 shadow-sm",
               "hover:shadow-md transition-shadow"
