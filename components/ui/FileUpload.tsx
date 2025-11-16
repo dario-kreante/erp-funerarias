@@ -2,7 +2,7 @@
 
 import { useRef, useState, ChangeEvent, DragEvent } from 'react'
 import { cx } from '@/lib/utils/cx'
-import { UploadCloud01Icon, FileIcon, XCloseIcon } from '@untitledui/icons-react'
+import { UploadCloud01, File01, XClose } from '@untitledui/icons'
 import { Button } from './Button'
 
 export interface FileUploadProps {
@@ -118,7 +118,7 @@ export function FileUpload({
         )}
         onClick={() => inputRef.current?.click()}
       >
-        <UploadCloud01Icon className="mb-3 h-10 w-10 text-gray-400" />
+        <UploadCloud01 className="mb-3 h-10 w-10 text-gray-400" />
         <p className="mb-1 text-sm text-gray-700">
           <span className="font-semibold text-primary-600">Haz clic para subir</span> o arrastra archivos
         </p>
@@ -143,7 +143,7 @@ export function FileUpload({
               className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-3"
             >
               <div className="flex items-center gap-2">
-                <FileIcon className="h-5 w-5 text-gray-400" />
+                <File01 className="h-5 w-5 text-gray-400" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">{file.name}</p>
                   <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
@@ -157,7 +157,7 @@ export function FileUpload({
                 }}
                 className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
               >
-                <XCloseIcon className="h-4 w-4" />
+                <XClose className="h-4 w-4" />
               </button>
             </div>
           ))}

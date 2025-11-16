@@ -18,7 +18,7 @@ export function BranchSelector() {
         <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs">
           H
         </div>
-        <span className="text-sm font-medium text-gray-900">{branches[0].name}</span>
+        <span className="text-sm font-medium text-gray-900">{branches[0].nombre}</span>
       </div>
     )
   }
@@ -36,7 +36,7 @@ export function BranchSelector() {
           H
         </div>
         <span className="text-sm font-medium text-gray-900">
-          {selectedBranch?.name || 'Seleccionar sucursal'}
+          {selectedBranch?.nombre || 'Seleccionar sucursal'}
         </span>
         <svg
           className={`h-4 w-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -70,7 +70,7 @@ export function BranchSelector() {
                       : "text-gray-700 hover:bg-gray-100"
                   )}
                 >
-                  {branch.name}
+                  {branch.nombre}
                 </button>
               ))}
             </div>

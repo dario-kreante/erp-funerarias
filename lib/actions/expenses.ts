@@ -6,16 +6,29 @@ import { z } from 'zod'
 
 const expenseSchema = z.object({
   service_id: z.string().uuid().optional().nullable(),
-  expense_date: z.string().default(new Date().toISOString().split('T')[0]),
+  fecha_egreso: z.string().default(() => new Date().toISOString().split('T')[0]),
   supplier_id: z.string().uuid().optional().nullable(),
-  supplier_name: z.string().optional().nullable(),
-  concept: z.string().min(1, 'El concepto es requerido'),
-  amount: z.number().positive('El monto debe ser positivo'),
-  category: z.string().optional().nullable(),
-  tax_info: z.string().optional().nullable(),
-  invoice_number: z.string().optional().nullable(),
-  status: z.enum(['con_factura', 'pendiente_factura', 'sin_factura']).default('sin_factura'),
+  nombre_proveedor: z.string().optional().nullable(),
+  concepto: z.string().min(1, 'El concepto es requerido'),
+  monto: z.number().positive('El monto debe ser positivo'),
+  categoria: z.enum([
+    'insumos',
+    'servicios_externos',
+    'combustible',
+    'mantenimiento',
+    'servicios_publicos',
+    'arriendos',
+    'honorarios',
+    'impuestos',
+    'seguros',
+    'otros',
+  ]).optional().nullable(),
+  info_impuestos: z.string().optional().nullable(),
+  numero_factura: z.string().optional().nullable(),
+  estado: z.enum(['con_factura', 'pendiente_factura', 'sin_factura']).default('sin_factura'),
 })
+
+export type ExpenseInput = z.infer<typeof expenseSchema>
 
 export async function getExpenses(filters?: {
   service_id?: string
@@ -26,7 +39,7 @@ export async function getExpenses(filters?: {
   supplier_id?: string
 }) {
   const supabase = await createClient()
-  
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -49,30 +62,30 @@ export async function getExpenses(filters?: {
     .from('expenses')
     .select(`
       *,
-      service:services(*),
-      supplier:suppliers(*)
+      service:services(id, numero_servicio, nombre_fallecido),
+      supplier:suppliers(id, nombre)
     `)
     .eq('funeral_home_id', profile.funeral_home_id)
-    .order('expense_date', { ascending: false })
+    .order('fecha_egreso', { ascending: false })
 
   if (filters?.service_id) {
     query = query.eq('service_id', filters.service_id)
   }
 
   if (filters?.status) {
-    query = query.eq('status', filters.status)
+    query = query.eq('estado', filters.status)
   }
 
   if (filters?.category) {
-    query = query.eq('category', filters.category)
+    query = query.eq('categoria', filters.category)
   }
 
   if (filters?.date_from) {
-    query = query.gte('expense_date', filters.date_from)
+    query = query.gte('fecha_egreso', filters.date_from)
   }
 
   if (filters?.date_to) {
-    query = query.lte('expense_date', filters.date_to)
+    query = query.lte('fecha_egreso', filters.date_to)
   }
 
   if (filters?.supplier_id) {
@@ -88,9 +101,67 @@ export async function getExpenses(filters?: {
   return data
 }
 
-export async function createExpense(input: z.infer<typeof expenseSchema>) {
+export async function getExpenseStats() {
   const supabase = await createClient()
-  
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('No autenticado')
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('funeral_home_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile) {
+    throw new Error('Perfil no encontrado')
+  }
+
+  const { data: stats, error } = await supabase
+    .from('expenses')
+    .select('monto, estado, categoria, fecha_egreso')
+    .eq('funeral_home_id', profile.funeral_home_id)
+
+  if (error) {
+    throw error
+  }
+
+  const today = new Date()
+  const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+
+  const totalEgresos = stats.reduce((sum, e) => sum + Number(e.monto), 0)
+
+  const egresosMes = stats
+    .filter(e => new Date(e.fecha_egreso) >= thisMonth)
+    .reduce((sum, e) => sum + Number(e.monto), 0)
+
+  const sinFactura = stats.filter(e => e.estado === 'sin_factura').length
+  const pendienteFactura = stats.filter(e => e.estado === 'pendiente_factura').length
+
+  const byCategory = stats.reduce((acc: Record<string, number>, e) => {
+    const cat = e.categoria || 'otros'
+    acc[cat] = (acc[cat] || 0) + Number(e.monto)
+    return acc
+  }, {})
+
+  return {
+    totalEgresos,
+    egresosMes,
+    cantidadEgresos: stats.length,
+    sinFactura,
+    pendienteFactura,
+    byCategory,
+  }
+}
+
+export async function createExpense(input: ExpenseInput) {
+  const supabase = await createClient()
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -136,9 +207,18 @@ export async function createExpense(input: z.infer<typeof expenseSchema>) {
   const { data, error } = await supabase
     .from('expenses')
     .insert({
-      ...validated,
+      service_id: validated.service_id,
       funeral_home_id: profile.funeral_home_id,
       branch_id,
+      fecha_egreso: validated.fecha_egreso,
+      supplier_id: validated.supplier_id,
+      nombre_proveedor: validated.nombre_proveedor,
+      concepto: validated.concepto,
+      monto: validated.monto,
+      categoria: validated.categoria,
+      info_impuestos: validated.info_impuestos,
+      numero_factura: validated.numero_factura,
+      estado: validated.estado,
       created_by: user.id,
     })
     .select()
@@ -155,9 +235,9 @@ export async function createExpense(input: z.infer<typeof expenseSchema>) {
   return data
 }
 
-export async function updateExpense(id: string, input: Partial<z.infer<typeof expenseSchema>>) {
+export async function updateExpense(id: string, input: Partial<ExpenseInput>) {
   const supabase = await createClient()
-  
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -168,9 +248,21 @@ export async function updateExpense(id: string, input: Partial<z.infer<typeof ex
 
   const validated = expenseSchema.partial().parse(input)
 
+  const updateData: Record<string, any> = {}
+  if (validated.service_id !== undefined) updateData.service_id = validated.service_id
+  if (validated.fecha_egreso) updateData.fecha_egreso = validated.fecha_egreso
+  if (validated.supplier_id !== undefined) updateData.supplier_id = validated.supplier_id
+  if (validated.nombre_proveedor !== undefined) updateData.nombre_proveedor = validated.nombre_proveedor
+  if (validated.concepto) updateData.concepto = validated.concepto
+  if (validated.monto) updateData.monto = validated.monto
+  if (validated.categoria !== undefined) updateData.categoria = validated.categoria
+  if (validated.info_impuestos !== undefined) updateData.info_impuestos = validated.info_impuestos
+  if (validated.numero_factura !== undefined) updateData.numero_factura = validated.numero_factura
+  if (validated.estado) updateData.estado = validated.estado
+
   const { data, error } = await supabase
     .from('expenses')
-    .update(validated)
+    .update(updateData)
     .eq('id', id)
     .select()
     .single()
@@ -186,3 +278,35 @@ export async function updateExpense(id: string, input: Partial<z.infer<typeof ex
   return data
 }
 
+export async function deleteExpense(id: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('No autenticado')
+  }
+
+  // Get expense info first for revalidation
+  const { data: expense } = await supabase
+    .from('expenses')
+    .select('service_id')
+    .eq('id', id)
+    .single()
+
+  const { error } = await supabase
+    .from('expenses')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    throw error
+  }
+
+  revalidatePath('/egresos')
+  if (expense?.service_id) {
+    revalidatePath(`/servicios/${expense.service_id}`)
+  }
+}

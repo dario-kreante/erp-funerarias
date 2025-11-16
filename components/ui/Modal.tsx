@@ -9,7 +9,7 @@ import {
   Heading
 } from 'react-aria-components'
 import { cx } from '@/lib/utils/cx'
-import { XCloseIcon } from '@untitledui/icons-react'
+import { XClose } from '@untitledui/icons'
 import { Button } from './Button'
 
 export interface ModalProps {
@@ -83,7 +83,7 @@ export function Modal({
                       className="ml-4 rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                       aria-label="Cerrar"
                     >
-                      <XCloseIcon className="h-5 w-5" />
+                      <XClose className="h-5 w-5" />
                     </button>
                   )}
                 </div>

@@ -88,11 +88,13 @@ export interface TableCellProps {
   children: ReactNode
   className?: string
   align?: 'left' | 'center' | 'right'
+  colSpan?: number
 }
 
-export function TableCell({ children, className, align = 'left' }: TableCellProps) {
+export function TableCell({ children, className, align = 'left', colSpan }: TableCellProps) {
   return (
     <td
+      colSpan={colSpan}
       className={cx(
         'whitespace-nowrap px-6 py-4 text-sm text-gray-900',
         align === 'left' && 'text-left',

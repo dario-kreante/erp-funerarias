@@ -11,7 +11,7 @@ import {
   Text
 } from 'react-aria-components'
 import { cx } from '@/lib/utils/cx'
-import { ChevronDownIcon } from '@untitledui/icons-react'
+import { ChevronDown } from '@untitledui/icons'
 
 export interface SelectOption {
   value: string
@@ -69,7 +69,7 @@ export function Select<T extends object = SelectOption>({
         <SelectValue className="flex-1 text-left placeholder-shown:text-gray-400">
           {({ selectedText }) => selectedText || placeholder}
         </SelectValue>
-        <ChevronDownIcon className="h-4 w-4 text-gray-500" />
+        <ChevronDown className="h-4 w-4 text-gray-500" />
       </Button>
       {errorMessage && (
         <Text slot="errorMessage" className="text-xs text-error-600">
