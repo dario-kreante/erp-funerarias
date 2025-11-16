@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ERP Esencial para Funerarias
 
-## Getting Started
+Sistema web completo para gestionar la operación administrativa y diaria de una funeraria en Chile.
 
-First, run the development server:
+## Stack Tecnológico
+
+- **Frontend**: Next.js 16 (App Router) + React 19 + TypeScript
+- **UI Components**: Untitled UI Components + Tailwind CSS v4
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **Autenticación**: Supabase Auth completo
+- **Validación**: Zod
+- **Formularios**: React Hook Form
+
+## Configuración Inicial
+
+### 1. Variables de Entorno
+
+Crea un archivo `.env.local` en la raíz del proyecto con las siguientes variables:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://eubgswsrqdwebchhnlkj.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_aqui
+SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key_aqui
+```
+
+### 2. Base de Datos
+
+Aplica las migraciones SQL en Supabase:
+
+1. Ve a tu proyecto en Supabase Dashboard
+2. Navega a SQL Editor
+3. Ejecuta las migraciones en orden:
+   - `supabase/migrations/001_initial_schema.sql`
+   - `supabase/migrations/002_rls_policies.sql`
+   - `supabase/migrations/003_functions_and_triggers.sql`
+
+### 3. Instalación de Dependencias
+
+```bash
+npm install
+```
+
+### 4. Ejecutar en Desarrollo
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La aplicación estará disponible en `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estructura del Proyecto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+app/
+├── (auth)/              # Rutas de autenticación
+│   └── login/
+├── (dashboard)/        # Rutas del dashboard (protegidas)
+│   ├── dashboard/
+│   ├── servicios/
+│   ├── transacciones/
+│   ├── egresos/
+│   ├── ventas/
+│   ├── agenda/
+│   ├── nomina/
+│   ├── administracion/
+│   └── mi-perfil/
+lib/
+├── supabase/           # Clientes de Supabase
+├── actions/            # Server Actions
+├── validations/        # Schemas Zod
+├── hooks/              # React hooks
+├── contexts/           # React contexts
+└── utils/              # Utilidades
+components/
+├── layout/             # Componentes de layout
+├── auth/               # Componentes de autenticación
+└── ui/                 # Componentes UI (Untitled UI)
+supabase/
+└── migrations/         # Migraciones SQL
+types/
+└── database.ts         # Tipos TypeScript de la BD
+```
 
-## Learn More
+## Módulos Implementados
 
-To learn more about Next.js, take a look at the following resources:
+### ✅ Completados
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Autenticación y multi-tenant
+- Layout con Sidebar y Header
+- Listado de Servicios
+- Detalle de Servicio
+- Transacciones (Pagos)
+- Egresos
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🚧 En Desarrollo
 
-## Deploy on Vercel
+- Formulario de creación/edición de servicios
+- Agenda
+- Ventas
+- Nómina
+- Cuota Mortuoria
+- Catálogos de administración
+- Dashboard con KPIs
+- Exportaciones
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Roles de Usuario
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Admin**: Acceso total
+- **Ejecutivo**: Gestión de servicios y ventas
+- **Operaciones**: Gestión de agenda y colaboradores
+- **Caja**: Transacciones y egresos
+- **Colaborador**: Solo lectura limitada
+
+## Seguridad
+
+- Row Level Security (RLS) habilitado en todas las tablas
+- Políticas RLS basadas en `funeral_home_id` y `branch_id`
+- Validación multi-capa (cliente y servidor)
+- Middleware de autenticación
+
+## Próximos Pasos
+
+1. Completar formularios de creación/edición
+2. Implementar módulo de agenda con calendario
+3. Agregar gráficos al dashboard
+4. Implementar exportaciones CSV/Excel
+5. Completar catálogos de administración
+6. Agregar tests
+
+## Licencia
+
+Privado - Uso interno

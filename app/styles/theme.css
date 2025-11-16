@@ -1,0 +1,168 @@
+@theme {
+    /* FONT FAMILY */
+    --font-body: var(--font-inter, "Inter"), -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --font-display: var(--font-inter, "Inter"), -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --font-mono: ui-monospace, "Roboto Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+ 
+    /* FONT SIZE */
+    --text-xs: calc(var(--spacing) * 3);
+    --text-xs--line-height: calc(var(--spacing) * 4.5);
+ 
+    --text-sm: calc(var(--spacing) * 3.5);
+    --text-sm--line-height: calc(var(--spacing) * 5);
+ 
+    --text-md: calc(var(--spacing) * 4);
+    --text-md--line-height: calc(var(--spacing) * 6);
+ 
+    --text-lg: calc(var(--spacing) * 4.5);
+    --text-lg--line-height: calc(var(--spacing) * 7);
+ 
+    --text-xl: calc(var(--spacing) * 5);
+    --text-xl--line-height: calc(var(--spacing) * 7.5);
+ 
+    --text-display-xs: calc(var(--spacing) * 6);
+    --text-display-xs--line-height: calc(var(--spacing) * 8);
+ 
+    --text-display-sm: calc(var(--spacing) * 7.5);
+    --text-display-sm--line-height: calc(var(--spacing) * 9.5);
+ 
+    --text-display-md: calc(var(--spacing) * 9);
+    --text-display-md--line-height: calc(var(--spacing) * 11);
+    --text-display-md--letter-spacing: -0.72px;
+ 
+    --text-display-lg: calc(var(--spacing) * 12);
+    --text-display-lg--line-height: calc(var(--spacing) * 15);
+    --text-display-lg--letter-spacing: -0.96px;
+ 
+    --text-display-xl: calc(var(--spacing) * 15);
+    --text-display-xl--line-height: calc(var(--spacing) * 18);
+    --text-display-xl--letter-spacing: -1.2px;
+ 
+    --text-display-2xl: calc(var(--spacing) * 18);
+    --text-display-2xl--line-height: calc(var(--spacing) * 22.5);
+    --text-display-2xl--letter-spacing: -1.44px;
+ 
+    /* MAX WIDTH */
+    --max-width-container: 1280px;
+ 
+    /* BREAKPOINTS */
+    --breakpoint-xxs: 320px;
+    /* This must match the breakpoint in Sonner: https://github.com/emilkowalski/sonner/blob/main/src/styles.css */
+    --breakpoint-xs: 600px;
+ 
+    /* RADIUS */
+    --radius-none: 0px;
+    --radius-xs: 0.125rem;
+    --radius-sm: 0.25rem;
+    --radius-DEFAULT: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+    --radius-full: 9999px;
+ 
+    /* SHADOW */
+    --shadow-xs: 0px 1px 2px rgba(10, 13, 18, 0.05);
+    --shadow-sm: 0px 1px 3px rgba(10, 13, 18, 0.1), 0px 1px 2px -1px rgba(10, 13, 18, 0.1);
+    --shadow-md: 0px 4px 6px -1px rgba(10, 13, 18, 0.1), 0px 2px 4px -2px rgba(10, 13, 18, 0.06);
+    --shadow-lg: 0px 12px 16px -4px rgba(10, 13, 18, 0.08), 0px 4px 6px -2px rgba(10, 13, 18, 0.03), 0px 2px 2px -1px rgba(10, 13, 18, 0.04);
+    --shadow-xl: 0px 20px 24px -4px rgba(10, 13, 18, 0.08), 0px 8px 8px -4px rgba(10, 13, 18, 0.03), 0px 3px 3px -1.5px rgba(10, 13, 18, 0.04);
+    --shadow-2xl: 0px 24px 48px -12px rgba(10, 13, 18, 0.18), 0px 4px 4px -2px rgba(10, 13, 18, 0.04);
+    --shadow-3xl: 0px 32px 64px -12px rgba(10, 13, 18, 0.14), 0px 5px 5px -2.5px rgba(10, 13, 18, 0.04);
+    --shadow-inner: inset 0px 2px 4px rgba(10, 13, 18, 0.06);
+ 
+    --shadow-skeumorphic: 0px 0px 0px 1px rgba(10, 13, 18, 0.18) inset, 0px -2px 0px 0px rgba(10, 13, 18, 0.05) inset;
+    --shadow-xs-skeumorphic: var(--shadow-skeumorphic), var(--shadow-xs);
+ 
+    --shadow-modern-mockup-inner-lg: 0px 0px 3.765px 1.255px rgba(10, 13, 18, 0.08) inset, 0px 0px 2.51px 1.255px rgba(10, 13, 18, 0.03) inset;
+    --shadow-modern-mockup-inner-md: 0px 0px 1.692px 0.564px rgba(10, 13, 18, 0.08) inset, 0px 0px 1.128px 0.564px rgba(10, 13, 18, 0.03) inset;
+    --shadow-modern-mockup-inner-sm: 0px 0px 4.48px 1.493px rgba(10, 13, 18, 0.08) inset, 0px 0px 2.987px 1.493px rgba(10, 13, 18, 0.03) inset;
+ 
+    --shadow-modern-mockup-outer-lg:
+        0px 7.529px 10.039px -2.51px rgba(10, 13, 18, 0.08), 0px 2.51px 3.765px -1.255px rgba(10, 13, 18, 0.03),
+        0px 1.255px 1.255px -0.627px rgba(10, 13, 18, 0.04);
+    --shadow-modern-mockup-outer-md:
+        0px 3.385px 4.513px -1.128px rgba(10, 13, 18, 0.08), 0px 1.128px 1.692px -0.564px rgba(10, 13, 18, 0.03),
+        0px 0.564px 0.564px -0.282px rgba(10, 13, 18, 0.04);
+ 
+    --drop-shadow-iphone-mockup: 20px 12px 18px rgba(16, 24, 40, 0.2);
+ 
+    /* ANIMATIONS */
+    --animate-marquee: marquee 60s linear infinite;
+    --animate-caret-blink: caret-blink 1s infinite;
+ 
+    @keyframes marquee {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(-100%);
+        }
+    }
+ 
+    @keyframes caret-blink {
+        0%, 50% {
+            opacity: 1;
+        }
+        51%, 100% {
+            opacity: 0;
+        }
+    }
+ 
+    /* SPACING */
+    --spacing: 0.25rem;
+ 
+    /* COLORS - Light Mode */
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f8f9fa;
+    --color-bg-tertiary: #f1f3f5;
+    --color-bg-disabled: #e9ecef;
+    --color-bg-brand: #e7f5ff;
+    --color-bg-brand-solid: #0066cc;
+    --color-bg-brand-solid_hover: #0052a3;
+    --color-bg-error: #fff5f5;
+    --color-bg-error-solid: #e03131;
+    --color-bg-error-solid_hover: #c92a2a;
+    --color-bg-warning: #fff9db;
+    --color-bg-warning-solid: #fab005;
+    --color-bg-warning-solid_hover: #f59f00;
+    --color-bg-success: #ebfbee;
+    --color-bg-success-solid: #37b24d;
+    --color-bg-success-solid_hover: #2f9e44;
+ 
+    --color-text-primary: #0a0d12;
+    --color-text-secondary: #495057;
+    --color-text-tertiary: #868e96;
+    --color-text-disabled: #adb5bd;
+    --color-text-brand: #0066cc;
+    --color-text-brand-on-brand: #ffffff;
+    --color-text-error: #e03131;
+    --color-text-error-on-error: #ffffff;
+    --color-text-warning: #fab005;
+    --color-text-warning-on-warning: #ffffff;
+    --color-text-success: #37b24d;
+    --color-text-success-on-success: #ffffff;
+ 
+    --color-border-primary: #dee2e6;
+    --color-border-secondary: #e9ecef;
+    --color-border-tertiary: #f1f3f5;
+    --color-border-disabled: #e9ecef;
+    --color-border-brand: #0066cc;
+    --color-border-error: #e03131;
+    --color-border-warning: #fab005;
+    --color-border-success: #37b24d;
+ 
+    /* OUTLINE COLORS */
+    --outline-color-primary: var(--color-border-primary);
+    --outline-color-secondary: var(--color-border-secondary);
+    --outline-color-tertiary: var(--color-border-tertiary);
+    --outline-color-disabled: var(--color-border-disabled);
+    --outline-color-brand: var(--color-border-brand);
+    --outline-color-brand-solid: var(--color-bg-brand-solid);
+    --outline-color-brand-solid_hover: var(--color-bg-brand-solid_hover);
+    --outline-color-error: var(--color-border-error);
+    --outline-color-disabled_subtle: var(--color-border-disabled);
+    --outline-color-brand_alt: var(--color-border-brand);
+    --outline-color-error_subtle: var(--color-border-error);
+}
